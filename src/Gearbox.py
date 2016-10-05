@@ -13,12 +13,13 @@ class Gearbox(object):
     '''
 
 
-    def __init__(self, motors, maxSpeed=1):
+    def __init__(self, motors, maxSpeed=1, inverted=False):
         '''
         Constructor
         '''
         self.motorArr = []
         self.max = maxSpeed
+        self.inverted = inverted
         
         for motor in motors:
             self.motorArr.append(wpilib.VictorSP(motor))
@@ -28,4 +29,7 @@ class Gearbox(object):
         #prefs = wpilib.Preferences.getInstance()
         #if prefs.get("DriveEnabled", True):
         for motor in self.motorArr:
-            motor.set(Utils.clamp(-self.max, self.max, value))
+            if self.inverted:
+                motor.set(-Utils.clamp(-self.max, self.max, value))
+            else:
+                motor.set(Utils.clamp(-self.max, self.max, value))

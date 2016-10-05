@@ -15,7 +15,7 @@ class MyRobot(wpilib.IterativeRobot):
         self.timer = wpilib.Timer()
         
         self.leftGearbox = Gearbox.Gearbox([0, 1, 2])
-        self.rightGearbox = Gearbox.Gearbox([3, 4, 5])
+        self.rightGearbox = Gearbox.Gearbox([3, 4, 5], inverted=True)
         
         self.intake = Intake.Intake()
         
