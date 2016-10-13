@@ -3,6 +3,7 @@
 import wpilib
 import Gearbox
 import Intake
+import Gyro
 
 from robotpy_ext.autonomous import AutonomousModeSelector
 
@@ -14,8 +15,10 @@ class MyRobot(wpilib.IterativeRobot):
         """
         self.timer = wpilib.Timer()
         
-        self.leftGearbox = Gearbox.Gearbox([0, 1, 2])
-        self.rightGearbox = Gearbox.Gearbox([3, 4, 5], inverted=True)
+        self.gyro = Gyro.Gyro()
+        
+        self.leftGearbox = Gearbox.Gearbox([0, 1, 2], inverted=True)
+        self.rightGearbox = Gearbox.Gearbox([3, 4, 5])
         
         self.intake = Intake.Intake()
         
@@ -25,17 +28,22 @@ class MyRobot(wpilib.IterativeRobot):
         self.components = {
                            'left':  self.leftGearbox,
                            'right': self.rightGearbox,
-                           'intake': self.intake
+                           'intake': self.intake,
+                           'gyro': self.gyro
         }
         
         self.autonomous = AutonomousModeSelector('Autonomous', self.components)
 
     def autonomousPeriodic(self):
         """This function is called periodically during autonomous."""
+        self.gyro.update()
         self.autonomous.run()
         
     def teleopPeriodic(self):
         """This function is called periodically during operator control."""
+        
+        self.gyro.update()
+        
         leftSide = self.leftJoystick.getRawAxis(1)
         rightSide = self.rightJoystick.getRawAxis(1)
         
@@ -45,13 +53,13 @@ class MyRobot(wpilib.IterativeRobot):
         self.rightGearbox.max = prefs.get("MaxRightSpeed", 1)
         """
         
-        self.leftGearbox.set(leftSide)
-        self.rightGearbox.set(rightSide)
+        self.leftGearbox.set(-leftSide)
+        self.rightGearbox.set(-rightSide)
         
         if self.leftJoystick.getRawButton(3) or self.rightJoystick.getRawButton(3):
-            self.intake.set(1)
-        elif self.leftJoystick.getRawButton(1) or self.rightJoystick.getRawButton(1):
             self.intake.set(-1)
+        elif self.leftJoystick.getRawButton(1) or self.rightJoystick.getRawButton(1):
+            self.intake.set(1)
         else:
             self.intake.set(0)
             

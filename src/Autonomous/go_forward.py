@@ -18,8 +18,8 @@ class Go_Forward(StatefulAutonomous):
     
     @timed_state(duration=3, first=True, next_state="stop")
     def forward(self):
-        self.left.set(1)
-        self.right.set(1)
+        self.left.set(-1)
+        self.right.set(-1)
         
     @timed_state(duration=12)
     def stop(self):
