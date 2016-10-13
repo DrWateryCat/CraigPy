@@ -14,12 +14,12 @@ class Go_Forward(StatefulAutonomous):
     MODE_NAME = "Go Forward"
     
     def initialize(self):
-        pass
+        self.kP = self.prefs.get("kP", 0.03)
     
     @timed_state(duration=3, first=True, next_state="stop")
     def forward(self):
-        self.left.set(-1)
-        self.right.set(-1)
+        self.left.set(1, self.gyro, self.kP)
+        self.right.set(1, self.gyro, self.kP)
         
     @timed_state(duration=12)
     def stop(self):

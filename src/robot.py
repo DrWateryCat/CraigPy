@@ -17,8 +17,8 @@ class MyRobot(wpilib.IterativeRobot):
         
         self.gyro = Gyro.Gyro()
         
-        self.leftGearbox = Gearbox.Gearbox([0, 1, 2], inverted=True)
-        self.rightGearbox = Gearbox.Gearbox([3, 4, 5])
+        self.leftGearbox = Gearbox.Gearbox([0, 1, 2])
+        self.rightGearbox = Gearbox.Gearbox([3, 4, 5], inverted=True)
         
         self.intake = Intake.Intake()
         
@@ -47,7 +47,7 @@ class MyRobot(wpilib.IterativeRobot):
                            'intake': self.intake,
                            'gyro': self.gyro,
                            'prefs': self.prefs,
-                           'isSim': self.isSimulation()
+                           'isSim': self.isSimulation(),
         }
         
         self.autonomous = AutonomousModeSelector('Autonomous', self.components)
@@ -66,14 +66,21 @@ class MyRobot(wpilib.IterativeRobot):
         
         leftSide = self.leftJoystick.getRawAxis(1)
         rightSide = self.rightJoystick.getRawAxis(1)
+        useGyro = False
+        kP = 0.03;
         
         if self.isReal():
             self.leftGearbox.max = self.prefs.get("MaxLeftSpeed", 1)
             self.rightGearbox.max = self.prefs.get("MaxRightSpeed", 1)
+            useGyro = self.prefs.get('UseGyro', False)
+            kP = self.prefs.get('kP', 0.03)
         
-        
-        self.leftGearbox.set(-leftSide)
-        self.rightGearbox.set(-rightSide)
+        if not useGyro:
+            self.leftGearbox.set(leftSide)
+            self.rightGearbox.set(rightSide)
+        else:
+            self.leftGearbox.set_with_gyro(leftSide, self.gyro, kP)
+            self.rightGearbox.set_with_gyro(rightSide, self.gyro, kP)
         
         if self.leftJoystick.getRawButton(3) or self.rightJoystick.getRawButton(3):
             self.intake.set(-1)
