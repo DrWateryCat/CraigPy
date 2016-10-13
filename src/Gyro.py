@@ -28,15 +28,15 @@ class Gyro(object):
         zbufferh = (self.i2c.read(0x2d, 1) if not wpilib.hal.HALIsSimulation() else 0)
             
         
-        self.x = ((xbufferh & 0xff) << 8 | (xbufferl & 0xff))
+        self.x = ((xbufferh[0] & 0xff) << 8 | (xbufferl[0] & 0xff))
         if self.x >= 32768:
             self.x -= 65536
             
-        self.y = ((ybufferh & 0xff) << 8 | (ybufferl & 0xff))
+        self.y = ((ybufferh[0] & 0xff) << 8 | (ybufferl[0] & 0xff))
         if self.y >= 32768:
             self.y -= 65536
         
-        self.z = ((zbufferh & 0xff) << 8 | (zbufferl & 0xff))
+        self.z = ((zbufferh[0] & 0xff) << 8 | (zbufferl[0] & 0xff))
         if self.z >= 32768:
             self.z -= 32768
             
@@ -49,5 +49,8 @@ class Gyro(object):
     def update(self):
         if self.connected():
             self.recieve_data()
+            wpilib.SmartDashboard.putNumber("Gyro X", self.x)
+            wpilib.SmartDashboard.putNumber("Gyro Y", self.y)
+            wpilib.SmartDashboard.putNumber("Gyro Z", self.z)
         else:
             warnings.warn("No I2C detected")
