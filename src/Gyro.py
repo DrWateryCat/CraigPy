@@ -5,10 +5,11 @@ Created on Oct 13, 2016
 '''
 
 import wpilib
+import warnings
 
 class Gyro(object):
     def __init__(self):
-        self.i2c = wpilib.I2C(wpilib.I2C.Port.kOnboard)
+        self.i2c = wpilib.I2C(wpilib.I2C.Port.kOnboard, 0x69)
         self.x = 0
         self.y = 0
         self.z = 0
@@ -19,12 +20,13 @@ class Gyro(object):
         self.i2c.write(0x20, 0xb7)
         
     def recieve_data(self):
-        xbufferl = self.i2c.read(0x28, 1)
-        xbufferh = self.i2c.read(0x29, 1)
-        ybufferl = self.i2c.read(0x2a, 1)
-        ybufferh = self.i2c.read(0x2b, 1)
-        zbufferl = self.i2c.read(0x2c, 1)
-        zbufferh = self.i2c.read(0x2d, 1)
+        xbufferl = (self.i2c.read(0x28, 1) if not wpilib.hal.HALIsSimulation() else 0) 
+        xbufferh = (self.i2c.read(0x29, 1) if not wpilib.hal.HALIsSimulation() else 0)
+        ybufferl = (self.i2c.read(0x2a, 1) if not wpilib.hal.HALIsSimulation() else 0)
+        ybufferh = (self.i2c.read(0x2b, 1) if not wpilib.hal.HALIsSimulation() else 0)
+        zbufferl = (self.i2c.read(0x2c, 1) if not wpilib.hal.HALIsSimulation() else 0)
+        zbufferh = (self.i2c.read(0x2d, 1) if not wpilib.hal.HALIsSimulation() else 0)
+            
         
         self.x = ((xbufferh & 0xff) << 8 | (xbufferl & 0xff))
         if self.x >= 32768:
@@ -39,7 +41,7 @@ class Gyro(object):
             self.z -= 32768
             
     def connected(self):
-        detected = self.i2c.read(0x0F, 1)
+        detected = (self.i2c.read(0x0F, 1) if not wpilib.hal.HALIsSimulation() else False)
         
         return detected
         
@@ -48,4 +50,4 @@ class Gyro(object):
         if self.connected():
             self.recieve_data()
         else:
-            print("Gyro not detected!")
+            warnings.warn("No I2C detected")

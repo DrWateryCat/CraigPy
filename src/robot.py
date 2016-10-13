@@ -17,11 +17,6 @@ class MyRobot(wpilib.IterativeRobot):
         
         self.gyro = Gyro.Gyro()
         
-        if not wpilib.hal.HALIsSimulation():
-            self.prefs = wpilib.Preferences.getInstance()
-        else:
-            self.prefs = None
-        
         self.leftGearbox = Gearbox.Gearbox([0, 1, 2], inverted=True)
         self.rightGearbox = Gearbox.Gearbox([3, 4, 5])
         
@@ -30,17 +25,29 @@ class MyRobot(wpilib.IterativeRobot):
         self.leftJoystick = wpilib.Joystick(0)
         self.rightJoystick = wpilib.Joystick(1)
         
-        self.leftGearbox.max = self.prefs.get("MaxLeftSpeed", 1)
-        self.rightGearbox.max = self.prefs.get("MaxRightSpeed", 1)
-        
-        self.prefs.put("Robot", "CraigPy")
+        if self.isReal():
+            self.prefs = wpilib.Preferences.getInstance()
+            self.leftGearbox.max = self.prefs.get("MaxLeftSpeed", 1)
+            self.rightGearbox.max = self.prefs.get("MaxRightSpeed", 1)
+            self.prefs.put("Robot", "CraigPy")
+            
+        else:
+            class Preferences(object):
+                def __init__(self):
+                    pass
+                def get(self, string, ret):
+                    return ret
+                def set(self, k, v):
+                    pass
+            self.prefs = Preferences()
         
         self.components = {
                            'left':  self.leftGearbox,
                            'right': self.rightGearbox,
                            'intake': self.intake,
                            'gyro': self.gyro,
-                           'prefs': self.prefs
+                           'prefs': self.prefs,
+                           'isSim': self.isSimulation()
         }
         
         self.autonomous = AutonomousModeSelector('Autonomous', self.components)
@@ -60,8 +67,9 @@ class MyRobot(wpilib.IterativeRobot):
         leftSide = self.leftJoystick.getRawAxis(1)
         rightSide = self.rightJoystick.getRawAxis(1)
         
-        self.leftGearbox.max = self.prefs.get("MaxLeftSpeed", 1)
-        self.rightGearbox.max = self.prefs.get("MaxRightSpeed", 1)
+        if self.isReal():
+            self.leftGearbox.max = self.prefs.get("MaxLeftSpeed", 1)
+            self.rightGearbox.max = self.prefs.get("MaxRightSpeed", 1)
         
         
         self.leftGearbox.set(-leftSide)
