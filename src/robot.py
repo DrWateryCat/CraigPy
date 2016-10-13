@@ -17,6 +17,11 @@ class MyRobot(wpilib.IterativeRobot):
         
         self.gyro = Gyro.Gyro()
         
+        if not wpilib.hal.HALIsSimulation():
+            self.prefs = wpilib.Preferences.getInstance()
+        else:
+            self.prefs = None
+        
         self.leftGearbox = Gearbox.Gearbox([0, 1, 2], inverted=True)
         self.rightGearbox = Gearbox.Gearbox([3, 4, 5])
         
@@ -25,14 +30,22 @@ class MyRobot(wpilib.IterativeRobot):
         self.leftJoystick = wpilib.Joystick(0)
         self.rightJoystick = wpilib.Joystick(1)
         
+        self.leftGearbox.max = self.prefs.get("MaxLeftSpeed", 1)
+        self.rightGearbox.max = self.prefs.get("MaxRightSpeed", 1)
+        
+        self.prefs.put("Robot", "CraigPy")
+        
         self.components = {
                            'left':  self.leftGearbox,
                            'right': self.rightGearbox,
                            'intake': self.intake,
-                           'gyro': self.gyro
+                           'gyro': self.gyro,
+                           'prefs': self.prefs
         }
         
         self.autonomous = AutonomousModeSelector('Autonomous', self.components)
+        
+        
 
     def autonomousPeriodic(self):
         """This function is called periodically during autonomous."""
@@ -47,11 +60,9 @@ class MyRobot(wpilib.IterativeRobot):
         leftSide = self.leftJoystick.getRawAxis(1)
         rightSide = self.rightJoystick.getRawAxis(1)
         
-        """
-        prefs = wpilib.Preferences.getInstance()
-        self.leftGearbox.max = prefs.get("MaxLeftSpeed", 1)
-        self.rightGearbox.max = prefs.get("MaxRightSpeed", 1)
-        """
+        self.leftGearbox.max = self.prefs.get("MaxLeftSpeed", 1)
+        self.rightGearbox.max = self.prefs.get("MaxRightSpeed", 1)
+        
         
         self.leftGearbox.set(-leftSide)
         self.rightGearbox.set(-rightSide)
