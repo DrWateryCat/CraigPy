@@ -3,7 +3,9 @@
 import wpilib
 import Gearbox
 import Intake
-import Gyro
+import I2CGyro
+import ADXLGyro
+import Utils
 
 from robotpy_ext.autonomous import AutonomousModeSelector
 
@@ -15,7 +17,7 @@ class MyRobot(wpilib.IterativeRobot):
         """
         self.timer = wpilib.Timer()
         
-        self.gyro = Gyro.Gyro()
+        self.gyro = ADXLGyro.ADXLGyro()
         
         self.leftGearbox = Gearbox.Gearbox([0, 1, 2])
         self.rightGearbox = Gearbox.Gearbox([3, 4, 5], inverted=True)
@@ -25,21 +27,11 @@ class MyRobot(wpilib.IterativeRobot):
         self.leftJoystick = wpilib.Joystick(0)
         self.rightJoystick = wpilib.Joystick(1)
         
-        if self.isReal():
-            self.prefs = wpilib.Preferences.getInstance()
-            self.leftGearbox.max = self.prefs.get("MaxLeftSpeed", 1)
-            self.rightGearbox.max = self.prefs.get("MaxRightSpeed", 1)
-            self.prefs.put("Robot", "CraigPy")
-            
-        else:
-            class Preferences(object):
-                def __init__(self):
-                    pass
-                def get(self, string, ret):
-                    return ret
-                def set(self, k, v):
-                    pass
-            self.prefs = Preferences()
+        
+        self.prefs = wpilib.Preferences.getInstance()
+        self.leftGearbox.max = self.prefs.get("MaxLeftSpeed", 1)
+        self.rightGearbox.max = self.prefs.get("MaxRightSpeed", 1)
+        self.prefs.put("Robot", "CraigPy")
         
         self.components = {
                            'left':  self.leftGearbox,
@@ -48,16 +40,23 @@ class MyRobot(wpilib.IterativeRobot):
                            'gyro': self.gyro,
                            'prefs': self.prefs,
                            'isSim': self.isSimulation(),
+                           'utils': Utils
         }
         
         self.autonomous = AutonomousModeSelector('Autonomous', self.components)
         
+        self.gyro.calibrate()
+        
         
 
+    def update_gyro(self):
+        self.gyro.update()
+    
     def autonomousPeriodic(self):
         """This function is called periodically during autonomous."""
-        self.gyro.update()
-        self.autonomous.run()
+        self.autonomous.run(iter_fn=self.update_gyro)
+        
+    
         
     def teleopPeriodic(self):
         """This function is called periodically during operator control."""
@@ -66,21 +65,12 @@ class MyRobot(wpilib.IterativeRobot):
         
         leftSide = self.leftJoystick.getRawAxis(1)
         rightSide = self.rightJoystick.getRawAxis(1)
-        useGyro = False
-        kP = 0.03;
         
-        if self.isReal():
-            self.leftGearbox.max = self.prefs.get("MaxLeftSpeed", 1)
-            self.rightGearbox.max = self.prefs.get("MaxRightSpeed", 1)
-            useGyro = self.prefs.get('UseGyro', False)
-            kP = self.prefs.get('kP', 0.03)
+        self.leftGearbox.max = self.prefs.get("MaxLeftSpeed", 1)
+        self.rightGearbox.max = self.prefs.get("MaxRightSpeed", 1)
         
-        if not useGyro:
-            self.leftGearbox.set(leftSide)
-            self.rightGearbox.set(rightSide)
-        else:
-            self.leftGearbox.set_with_gyro(leftSide, self.gyro, kP)
-            self.rightGearbox.set_with_gyro(rightSide, self.gyro, kP)
+        self.leftGearbox.set(leftSide)
+        self.rightGearbox.set(rightSide)
         
         if self.leftJoystick.getRawButton(3) or self.rightJoystick.getRawButton(3):
             self.intake.set(-1)
@@ -88,6 +78,9 @@ class MyRobot(wpilib.IterativeRobot):
             self.intake.set(1)
         else:
             self.intake.set(0)
+            
+        wpilib.SmartDashboard.putNumber("Gyro Center", self.gyro.gyro.getCenter())
+        wpilib.SmartDashboard.putNumber("Gyro Y", self.gyro.y)
             
         
 

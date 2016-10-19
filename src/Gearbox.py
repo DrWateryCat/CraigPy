@@ -25,39 +25,21 @@ class Gearbox(object):
         for motor in motors:
             self.motorArr.append(wpilib.VictorSP(motor))
             
-    def set(self, value, gyro=None, kP = None):
+    def set(self, value, gyro=None, kP = None, syncgroup=0):
         if gyro is not None and kP is not None:
             self.set_with_gyro(value, gyro, kP)
         else:
-            enabled = True
-            if not wpilib.hal.HALIsSimulation():
-                prefs = wpilib.Preferences.getInstance()
-                if not prefs.get('DriveEnabled', True):
-                    enabled = False
+            for motor in self.motorArr:
+                if self.inverted:
+                    motor.set(-Utils.clamp(-1, 1, value))
                 else:
-                    enabled = True
-            
-            if enabled:
-                for motor in self.motorArr:
-                    if self.inverted:
-                        motor.set(-Utils.clamp(-1, 1, value))
-                    else:
-                        motor.set(Utils.clamp(-1, 1, value))
+                    motor.set(Utils.clamp(-1, 1, value))
 
                     
     def set_with_gyro(self, value, gyro, kP):
-        enabled = True
-        if not wpilib.hal.HALIsSimulation():
-            prefs = wpilib.Preferences.getInstance()
-            if not prefs.get('DriveEnabled', True):
-                enabled = False
+        for motor in self.motorArr:
+            if self.inverted:
+                motor.set(-Utils.clamp(-1, 1, (value - (gyro.y * kP))))
             else:
-                enabled = True
-                
-        if enabled:
-            for motor in self.motorArr:
-                if self.inverted:
-                    motor.set(-Utils.clamp(-1, 1, (value - (gyro.y * kP))))
-                else:
-                    motor.set(Utils.clamp(-1, 1, (value + (gyro.y * kP))))
+                motor.set(Utils.clamp(-1, 1, (value + (gyro.y * kP))))
 
