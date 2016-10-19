@@ -47,17 +47,18 @@ class MyRobot(wpilib.IterativeRobot):
         
         self.gyro.calibrate()
         
+        self.i = 0
+        
         
 
     def update_gyro(self):
         self.gyro.update()
+        
+
     
     def autonomousPeriodic(self):
         """This function is called periodically during autonomous."""
         self.autonomous.run(iter_fn=self.update_gyro)
-        
-    
-        
     def teleopPeriodic(self):
         """This function is called periodically during operator control."""
         
@@ -81,7 +82,12 @@ class MyRobot(wpilib.IterativeRobot):
             
         wpilib.SmartDashboard.putNumber("Gyro Center", self.gyro.gyro.getCenter())
         wpilib.SmartDashboard.putNumber("Gyro Y", self.gyro.y)
-            
+        
+        self.i += 1
+        
+        if self.i > 100:
+            self.gyro.reset()
+            self.i = 0
         
 
     def testPeriodic(self):
