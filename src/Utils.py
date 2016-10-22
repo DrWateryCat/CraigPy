@@ -11,7 +11,7 @@ def clamp(minV, maxV, value):
 
 def drive(magnitude, curve, gyro, kP=0.03):
     
-    curve *= (gyro.y * kP)
+    curve *= -(gyro.y * kP)
     
     if curve < 0:
         value = math.log(-curve)
@@ -34,7 +34,7 @@ def drive(magnitude, curve, gyro, kP=0.03):
     return [leftOutput, rightOutput]
 
 def autodrive(leftMotor, rightMotor, magnitude, curve, gyro):
-    speeds = drive(magnitude, curve, gyro)
+    speeds = drive(-magnitude, curve, gyro)
     
     leftMotor.set(speeds[0])
     rightMotor.set(speeds[1])

@@ -31,9 +31,9 @@ class Gearbox(object):
         else:
             for motor in self.motorArr:
                 if self.inverted:
-                    motor.set(-Utils.clamp(-1, 1, value))
+                    motor.set(-float(Utils.clamp(-1, 1, value)) * self.max)
                 else:
-                    motor.set(Utils.clamp(-1, 1, value))
+                    motor.set(float(Utils.clamp(-1, 1, value)) * self.max)
 
                     
     def set_with_gyro(self, value, gyro, kP):

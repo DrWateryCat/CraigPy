@@ -81,6 +81,7 @@ class MyRobot(wpilib.IterativeRobot):
             self.intake.set(0)
             
         wpilib.SmartDashboard.putNumber("Gyro Center", self.gyro.gyro.getCenter())
+        wpilib.SmartDashboard.putNumber("Gyro Angle", self.gyro.gyro.getAngle())
         wpilib.SmartDashboard.putNumber("Gyro Y", self.gyro.y)
         
         self.i += 1
@@ -88,8 +89,10 @@ class MyRobot(wpilib.IterativeRobot):
         if self.i > 100:
             self.gyro.reset()
             self.i = 0
-        
-
+            
+    def disabledInit(self):
+        self.gyro.calibrate()
+            
     def testPeriodic(self):
         """This function is called periodically during test mode."""
         pass
