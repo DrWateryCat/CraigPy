@@ -5,6 +5,7 @@ Created on Oct 4, 2016
 '''
 
 import math
+import wpilib
 
 def clamp(minV, maxV, value):
     return max(minV, min(maxV, value))
@@ -36,5 +37,5 @@ def drive(magnitude, curve, gyro, kP=0.03):
 def autodrive(leftMotor, rightMotor, magnitude, curve, gyro):
     speeds = drive(-magnitude, curve, gyro)
     
-    leftMotor.set(speeds[0])
-    rightMotor.set(speeds[1])
+    leftMotor.set(speeds[0] * 0.635)
+    rightMotor.set(speeds[1] * 1)

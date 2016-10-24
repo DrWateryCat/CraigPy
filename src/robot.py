@@ -29,8 +29,6 @@ class MyRobot(wpilib.IterativeRobot):
         
         
         self.prefs = wpilib.Preferences.getInstance()
-        self.leftGearbox.max = self.prefs.get("MaxLeftSpeed", 1)
-        self.rightGearbox.max = self.prefs.get("MaxRightSpeed", 1)
         self.prefs.put("Robot", "CraigPy")
         
         self.components = {
@@ -54,6 +52,9 @@ class MyRobot(wpilib.IterativeRobot):
     def update_gyro(self):
         self.gyro.update()
         
+    def autonomousInit(self):
+        pass
+        
 
     
     def autonomousPeriodic(self):
@@ -67,14 +68,12 @@ class MyRobot(wpilib.IterativeRobot):
         leftSide = self.leftJoystick.getRawAxis(1)
         rightSide = self.rightJoystick.getRawAxis(1)
         
-        self.leftGearbox.max = self.prefs.get("MaxLeftSpeed", 1)
-        self.rightGearbox.max = self.prefs.get("MaxRightSpeed", 1)
         
-        self.leftGearbox.set(leftSide)
-        self.rightGearbox.set(rightSide)
+        self.leftGearbox.set(leftSide * 0.635)
+        self.rightGearbox.set(rightSide * 1)
         
         if self.leftJoystick.getRawButton(3) or self.rightJoystick.getRawButton(3):
-            self.intake.set(-1)
+            self.intake.set(-0.5)
         elif self.leftJoystick.getRawButton(1) or self.rightJoystick.getRawButton(1):
             self.intake.set(1)
         else:

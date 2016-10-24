@@ -26,14 +26,11 @@ class Gearbox(object):
             self.motorArr.append(wpilib.VictorSP(motor))
             
     def set(self, value, gyro=None, kP = None, syncgroup=0):
-        if gyro is not None and kP is not None:
-            self.set_with_gyro(value, gyro, kP)
-        else:
-            for motor in self.motorArr:
-                if self.inverted:
-                    motor.set(-float(Utils.clamp(-1, 1, value)) * self.max)
-                else:
-                    motor.set(float(Utils.clamp(-1, 1, value)) * self.max)
+        for motor in self.motorArr:
+            if self.inverted:
+                motor.set(-float(Utils.clamp(-1, 1, value)) * self.max)
+            else:
+                motor.set(float(Utils.clamp(-1, 1, value)) * self.max)
 
                     
     def set_with_gyro(self, value, gyro, kP):

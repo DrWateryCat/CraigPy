@@ -16,11 +16,11 @@ class Go_Forward(StatefulAutonomous):
     def initialize(self):
         self.kP = self.prefs.get("kP", 0.03)
     
-    @timed_state(duration=2.5, first=True, next_state="stop")
+    @timed_state(duration=5, first=True, next_state="stop")
     def forward(self):
-        self.utils.autodrive(self.left, self.right, 0.25, self.gyro)
+        self.utils.autodrive(self.left, self.right, 0.5, 0, self.gyro)
                
-    @timed_state(duration=12)
+    @timed_state(duration=10)
     def stop(self):
         self.left.set(0)
         self.right.set(0)
